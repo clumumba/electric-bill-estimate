@@ -19,9 +19,9 @@ reports/
 *.pkl
 *.log
 .dvc/cache/
+dvc.lock*
 .dvc/tmp/
 .dvc/config.local
 .DS_Store
 Thumbs.db
 requirements-windows.*
-requirements-training.*

@@ -7,7 +7,6 @@ stages:
       hash: md5
       md5: e317add771cebd2df4121e50570eaa25
       size: 710998915
-      isexec: true
     - path: energy_mlops
       hash: md5
       md5: 85d897fd1ae90043007c08e576b49008.dir
@@ -18,7 +17,6 @@ stages:
       hash: md5
       md5: e3166137563b49ebb1ee285cc268e41a
       size: 732576890
-      isexec: true
   validate:
     cmd: python -m energy_mlops.cli validate
     deps:
@@ -26,7 +24,6 @@ stages:
       hash: md5
       md5: e3166137563b49ebb1ee285cc268e41a
       size: 732576890
-      isexec: true
     - path: energy_mlops
       hash: md5
       md5: 85d897fd1ae90043007c08e576b49008.dir
@@ -41,7 +38,6 @@ stages:
       hash: md5
       md5: 79cd91c957d1e6f954159517c5162d66
       size: 130
-      isexec: true
   preprocess:
     cmd: python -m energy_mlops.cli preprocess
     deps:
@@ -49,12 +45,10 @@ stages:
       hash: md5
       md5: e3166137563b49ebb1ee285cc268e41a
       size: 732576890
-      isexec: true
     - path: data/validation/validation_report.json
       hash: md5
       md5: 79cd91c957d1e6f954159517c5162d66
       size: 130
-      isexec: true
     - path: energy_mlops
       hash: md5
       md5: 85d897fd1ae90043007c08e576b49008.dir
@@ -93,17 +87,14 @@ stages:
       hash: md5
       md5: 18c6a7020de292c38f52405b420adbe8
       size: 437
-      isexec: true
     - path: data/processed/test.csv
       hash: md5
       md5: b0242bee9669f1c6b8178bb15b69e375
       size: 8011595
-      isexec: true
     - path: data/processed/train.csv
       hash: md5
       md5: 14ad85ed509dca38cf6a57d352c5ec1d
       size: 28535823
-      isexec: true
   train:
     cmd: python -m energy_mlops.cli train
     deps:
@@ -111,12 +102,10 @@ stages:
       hash: md5
       md5: 18c6a7020de292c38f52405b420adbe8
       size: 437
-      isexec: true
     - path: data/processed/train.csv
       hash: md5
       md5: 14ad85ed509dca38cf6a57d352c5ec1d
       size: 28535823
-      isexec: true
     - path: energy_mlops
       hash: md5
       md5: 85d897fd1ae90043007c08e576b49008.dir
@@ -126,7 +115,6 @@ stages:
       hash: md5
       md5: 4456f2489812f6f93eb3a0b7b7e59c66
       size: 15003
-      isexec: true
     params:
       params.yaml:
         mlflow.experiment_name: electricity-demand-forecast
@@ -143,12 +131,10 @@ stages:
       hash: md5
       md5: 737bf2b7adf61aba6bb1077a9526023c
       size: 38072198
-      isexec: true
     - path: reports/train_metrics.json
       hash: md5
       md5: d9d342dc79a4a11aed74ef19b8448e87
       size: 168
-      isexec: true
   evaluate:
     cmd: python -m energy_mlops.cli evaluate
     deps:
@@ -156,12 +142,10 @@ stages:
       hash: md5
       md5: 18c6a7020de292c38f52405b420adbe8
       size: 437
-      isexec: true
     - path: data/processed/test.csv
       hash: md5
       md5: b0242bee9669f1c6b8178bb15b69e375
       size: 8011595
-      isexec: true
     - path: energy_mlops
       hash: md5
       md5: 85d897fd1ae90043007c08e576b49008.dir
@@ -171,7 +155,6 @@ stages:
       hash: md5
       md5: 737bf2b7adf61aba6bb1077a9526023c
       size: 38072198
-      isexec: true
     params:
       params.yaml:
         model.minimum_baseline_improvement: 0.0
@@ -181,4 +164,3 @@ stages:
       hash: md5
       md5: 67b5ac8c0620ab399cf3f935e68845e0
       size: 1209
-      isexec: true
