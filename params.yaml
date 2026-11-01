@@ -1,0 +1,31 @@
+raw_data_path: "data/raw/LD2011_2014.txt"
+target_column: "MT_001"
+features:
+  # Source readings are 15-minute intervals. 96 = one day; 672 = one week.
+  lags: [1, 2, 3, 4, 8, 12, 24, 48, 96, 192, 672]
+  time:
+    - hour
+    - day_of_week
+    - day_of_month
+    - month
+    - is_weekend
+    - hour_sin
+    - hour_cos
+    - month_sin
+    - month_cos
+mlflow:
+  experiment_name: "electricity-demand-forecast"
+model:
+  n_estimators: 200
+  n_jobs: 2
+  max_depth: 12
+  random_state: 42
+  test_size: 0.2
+  minimum_r2: 0.7
+  minimum_baseline_improvement: 0.0
+billing:
+  interval_minutes: 15
+  energy_rate_per_kwh: 0.18
+  fixed_charge: 12.0
+  tax_rate: 0.05
+  currency: "USD"

@@ -1,0 +1,5 @@
+**
+!requirements.txt
+!params.yaml
+!energy_mlops/
+!energy_mlops/*.py

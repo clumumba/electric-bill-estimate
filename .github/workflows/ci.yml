@@ -1,0 +1,44 @@
+name: Verify and build
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      DVC_NO_ANALYTICS: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: requirements-dev.txt
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m pip check
+      - run: python -m pytest -q
+      - run: docker build --tag electricity-api:ci .
+      - name: Smoke test container startup and inference
+        env:
+          API_KEY: ci-only-synthetic-model-secret-key-32chars
+        run: |
+          python scripts/smoke_model.py /tmp/elec-smoke/latest_model.joblib
+          docker run -d --name elec-smoke --read-only --cap-drop ALL \
+            --security-opt no-new-privileges --tmpfs /tmp \
+            -e API_KEY -p 127.0.0.1:18000:8000 \
+            --mount type=bind,src=/tmp/elec-smoke,dst=/models,readonly electricity-api:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:18000/readyz; then break; fi
+            sleep 2
+          done
+          curl --fail http://127.0.0.1:18000/readyz
+          curl --fail -H "X-API-Key: $API_KEY" -H 'Content-Type: application/json' \
+            -d '{"features":{"hour":1}}' http://127.0.0.1:18000/v1/predictions \
+            | python -c 'import json,sys; assert json.load(sys.stdin)["prediction"] == 4'
+      - name: Container logs and cleanup
+        if: always()
+        run: |
+          docker logs elec-smoke || true
+          docker rm -f elec-smoke || true

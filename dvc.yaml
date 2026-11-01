@@ -1,0 +1,59 @@
+stages:
+  ingest:
+    cmd: python -m energy_mlops.cli ingest
+    deps:
+      - data/raw/LD2011_2014.txt
+      - energy_mlops
+    outs:
+      - data/processed/raw_snapshot.csv
+  validate:
+    cmd: python -m energy_mlops.cli validate
+    deps:
+      - data/processed/raw_snapshot.csv
+      - energy_mlops
+    params:
+      - target_column
+      - billing.interval_minutes
+    outs:
+      - data/validation/validation_report.json
+  preprocess:
+    cmd: python -m energy_mlops.cli preprocess
+    deps:
+      - data/processed/raw_snapshot.csv
+      - data/validation/validation_report.json
+      - energy_mlops
+    params:
+      - target_column
+      - features
+      - model.test_size
+      - billing.interval_minutes
+    outs:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - data/processed/feature_schema.json
+  train:
+    cmd: python -m energy_mlops.cli train
+    deps:
+      - data/processed/train.csv
+      - data/processed/feature_schema.json
+      - energy_mlops
+      - requirements-training.txt
+    params:
+      - model
+      - mlflow.experiment_name
+    outs:
+      - models/candidate_model.joblib
+    metrics:
+      - reports/train_metrics.json
+  evaluate:
+    cmd: python -m energy_mlops.cli evaluate
+    deps:
+      - data/processed/test.csv
+      - data/processed/feature_schema.json
+      - models/candidate_model.joblib
+      - energy_mlops
+    params:
+      - model.minimum_r2
+      - model.minimum_baseline_improvement
+    metrics:
+      - reports/evaluation_metrics.json

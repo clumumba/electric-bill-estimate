@@ -1,0 +1,27 @@
+services:
+  app:
+    build: .
+    platform: linux/amd64
+    init: true
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8000"
+    environment:
+      APP_ENV: production
+      API_KEY: ${API_KEY:?Set a random API_KEY of at least 32 characters}
+      MODEL_DIR: /models
+      MAX_BODY_BYTES: '1048576'
+      MAX_CONCURRENT_REQUESTS: '8'
+    volumes:
+      - ./models:/models:ro
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    cpus: 2.0
+    mem_limit: 1g
+    pids_limit: 128
+    stop_grace_period: 40s
