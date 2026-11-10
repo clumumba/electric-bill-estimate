@@ -18,25 +18,20 @@ from this directory.
 cd elec
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-dev.txt
+python -m pip install -r requirements.txt
 python -m pip check
 python main.py --help
 ```
 
-For local development, that **one install** includes training, serving, and tests.
+The single `requirements.txt` install includes serving, DVC training, MLflow,
+and test dependencies. The same file is used by Docker and CI.
 The help command loads the training imports without starting a training run. To
 run the project's tests, use `python -m pytest -q`. In a new terminal, return to
 this directory and run `source .venv/bin/activate` again.
 
-| If you need to… | Install in a fresh environment | What it includes |
-| --- | --- | --- |
-| Develop, train, and test | `python -m pip install -r requirements-dev.txt` | Training and serving packages, plus pytest and HTTPX for tests. This is the CI install. |
-| Train without the test tools | `python -m pip install --require-hashes -r requirements-training.txt` | Serving packages, plus DVC for the pipeline and MLflow for experiment tracking. The hashes target Linux x86_64 and Python 3.12. |
-| Serve an approved model | `python -m pip install -r requirements.txt` | FastAPI and Uvicorn for HTTP; pandas, NumPy, scikit-learn, and joblib for predictions; PyYAML and python-dotenv for configuration; Prometheus client for metrics. Docker uses this file. |
-
-The serving and development files pin versions without hashes. Keep the training
-file in the repository even if you install only the development file: the DVC
-training stage tracks it, and `requirements-dev.in` uses it when regenerating pins.
+`requirements.txt` is a unified exact-version list for serving, development,
+training, and tests. It also supplies the dependencies tracked by the DVC training
+stage. There are no separate serving, training, or development requirements files.
 
 If `import yaml` fails, the package name is **PyYAML**. Check which environment
 is running the app with `python -c 'import sys; print(sys.executable)'`. It should
@@ -129,8 +124,10 @@ docker compose up --build -d
 Production requires a key of at least 32 characters. `API_KEY_FILE` may point to a
 mounted secret and takes precedence over `API_KEY`. Never commit keys. Compose
 publishes only to loopback, runs as a non-root user with a read-only filesystem,
-and mounts approved models read-only. The image contains only serving dependencies,
-application modules, and parameters; it excludes datasets, `.env`, caches, and models.
+and mounts approved models read-only. The image installs the unified
+`requirements.txt`, so it includes training and test packages as well as serving
+packages. It contains the application modules and parameters, and excludes datasets,
+`.env`, caches, and models.
 Set `MODEL_DIR` when serving artifacts outside the default `models/` directory.
 
 Every endpoint except health probes requires `X-API-Key` when a key is configured.
@@ -147,12 +144,10 @@ intended for loopback-only use.
   counts, and active model version. Protect the scrape credential like an API key.
 
 For a local Uvicorn run, open `http://127.0.0.1:8000/docs`, expand `POST /v1/bill-estimates`,
-and choose **Try it out**. Before submitting, open `GET /v1/model/schema` in the docs
-and copy its `feature_columns` names into each instance's `features` object. The
-`all_required_features` value in the example below is a placeholder and must be
-replaced; it is not a valid feature name. Supply every listed feature exactly once,
-with a numeric value, and remove any extra keys. If the API key is configured, add
-`X-API-Key` in the docs' **Authorize** control.
+and choose **Try it out**. The example below matches this project's current schema;
+check `GET /v1/model/schema` after replacing the model. Each instance must include
+every feature name exactly once, with a numeric value, and no extra keys. If an API
+key is configured, add `X-API-Key` in the docs' **Authorize** control.
 
 Callers must construct calendar features and lags using the same formulas and
 observed history as training. Feature construction from raw history is not yet an
@@ -177,14 +172,14 @@ represent interval starts and must be ordered, unique, and contiguous. This is a
     {
       "features": {
         "hour": 0,
-        "day_of_week": 4,
+        "day_of_week": 3,
         "day_of_month": 1,
         "month": 1,
         "is_weekend": 0,
         "hour_sin": 0,
         "hour_cos": 1,
         "month_sin": 0.5,
-        "month_cos": 0.866,
+        "month_cos": 0.8660254,
         "lag_1": 0,
         "lag_2": 0,
         "lag_3": 0,
@@ -210,7 +205,13 @@ represent interval starts and must be ordered, unique, and contiguous. This is a
 }
 ```
 
-Replace the illustrative features with the model's actual schema. Charges use
+The calendar values correspond to midnight on January 1, 2026 (Thursday;
+`day_of_week` uses Monday=0). The lag values are zero only to demonstrate the JSON
+shape; replace them with observed target readings in kW. `lag_1` is one 15-minute
+interval before the timestamp, `lag_4` is one hour before, and `lag_96` is one day
+before. Construct all calendar and lag features with the same formulas and history
+used during training. The API does not derive these features from raw usage. This
+example estimates one 15-minute interval, not a monthly bill. Charges use
 Decimal arithmetic and round half-up to two decimal places; tax applies to the
 rounded variable and included fixed charges. Fixed charges are excluded unless
 explicitly requested, to avoid silently charging them for every batch. This endpoint
