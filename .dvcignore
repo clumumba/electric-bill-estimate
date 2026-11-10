@@ -3,3 +3,4 @@ __pycache__
 .elec
 .venv
 .pytest_cache
+dvc.lock

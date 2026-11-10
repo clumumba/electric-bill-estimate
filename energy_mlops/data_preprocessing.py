@@ -21,14 +21,14 @@ def create_time_features(df: pd.DataFrame) -> pd.DataFrame:
     frame["month_cos"] = np.cos(2 * np.pi * frame["month"] / 12)
     return frame
 
-
+# Add lag features for the target column.
 def add_lag_features(df: pd.DataFrame, target_column: str, lags: list[int]) -> pd.DataFrame:
     frame = df.copy()
     for lag in lags:
         frame[f"lag_{lag}"] = frame[target_column].shift(lag)
     return frame
 
-
+# Coerce the raw data into a timestamp-indexed DataFrame.
 def _coerce_raw_dataframe(raw_data: str | Path | pd.DataFrame) -> pd.DataFrame:
     if isinstance(raw_data, pd.DataFrame):
         return raw_data.copy()
@@ -37,7 +37,7 @@ def _coerce_raw_dataframe(raw_data: str | Path | pd.DataFrame) -> pd.DataFrame:
     df.index = pd.to_datetime(df.index)
     return df.sort_index().copy()
 
-
+# Build the feature matrix, target vector, and chronological train/test splits.
 def build_feature_matrix(raw_data: str | Path | pd.DataFrame, target_column: str | None = None, lags: list[int] | None = None) -> tuple[pd.DataFrame, pd.DataFrame, list[str], str]:
     params = load_params()
     target_column = target_column or params.get("target_column", "MT_001")

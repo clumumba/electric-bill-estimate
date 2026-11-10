@@ -1,3 +1,4 @@
+# Configuration file for the electricity demand forecasting MLOps pipeline.
 from __future__ import annotations
 
 import os

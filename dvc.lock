@@ -9,25 +9,25 @@ stages:
       size: 710998915
     - path: energy_mlops
       hash: md5
-      md5: 85d897fd1ae90043007c08e576b49008.dir
-      size: 41281
+      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
+      size: 41279
       nfiles: 12
     outs:
     - path: data/processed/raw_snapshot.csv
       hash: md5
-      md5: e3166137563b49ebb1ee285cc268e41a
-      size: 732576890
+      md5: 1c59834d1a500664b2190ed7cfa94759
+      size: 732717147
   validate:
     cmd: python -m energy_mlops.cli validate
     deps:
     - path: data/processed/raw_snapshot.csv
       hash: md5
-      md5: e3166137563b49ebb1ee285cc268e41a
-      size: 732576890
+      md5: 1c59834d1a500664b2190ed7cfa94759
+      size: 732717147
     - path: energy_mlops
       hash: md5
-      md5: 85d897fd1ae90043007c08e576b49008.dir
-      size: 41281
+      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
+      size: 41279
       nfiles: 12
     params:
       params.yaml:
@@ -36,23 +36,23 @@ stages:
     outs:
     - path: data/validation/validation_report.json
       hash: md5
-      md5: 79cd91c957d1e6f954159517c5162d66
-      size: 130
+      md5: 0577293cc3703827a24f73b6c27105ee
+      size: 138
   preprocess:
     cmd: python -m energy_mlops.cli preprocess
     deps:
     - path: data/processed/raw_snapshot.csv
       hash: md5
-      md5: e3166137563b49ebb1ee285cc268e41a
-      size: 732576890
+      md5: 1c59834d1a500664b2190ed7cfa94759
+      size: 732717147
     - path: data/validation/validation_report.json
       hash: md5
-      md5: 79cd91c957d1e6f954159517c5162d66
-      size: 130
+      md5: 0577293cc3703827a24f73b6c27105ee
+      size: 138
     - path: energy_mlops
       hash: md5
-      md5: 85d897fd1ae90043007c08e576b49008.dir
-      size: 41281
+      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
+      size: 41279
       nfiles: 12
     params:
       params.yaml:
@@ -85,36 +85,36 @@ stages:
     outs:
     - path: data/processed/feature_schema.json
       hash: md5
-      md5: 18c6a7020de292c38f52405b420adbe8
-      size: 437
+      md5: bf3cf24faafa36437bf42375db2e59d7
+      size: 464
     - path: data/processed/test.csv
       hash: md5
-      md5: b0242bee9669f1c6b8178bb15b69e375
-      size: 8011595
+      md5: 3faf0a8325ce8b5f1b00abd0408c0229
+      size: 8039513
     - path: data/processed/train.csv
       hash: md5
-      md5: 14ad85ed509dca38cf6a57d352c5ec1d
-      size: 28535823
+      md5: c5b0db344b40a26fecb67a26c1d9fb63
+      size: 28647491
   train:
     cmd: python -m energy_mlops.cli train
     deps:
     - path: data/processed/feature_schema.json
       hash: md5
-      md5: 18c6a7020de292c38f52405b420adbe8
-      size: 437
+      md5: bf3cf24faafa36437bf42375db2e59d7
+      size: 464
     - path: data/processed/train.csv
       hash: md5
-      md5: 14ad85ed509dca38cf6a57d352c5ec1d
-      size: 28535823
+      md5: c5b0db344b40a26fecb67a26c1d9fb63
+      size: 28647491
     - path: energy_mlops
       hash: md5
-      md5: 85d897fd1ae90043007c08e576b49008.dir
-      size: 41281
+      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
+      size: 41279
       nfiles: 12
     - path: requirements-training.txt
       hash: md5
-      md5: 4456f2489812f6f93eb3a0b7b7e59c66
-      size: 15003
+      md5: afe50f876bd53a5006c7bfd753f6686a
+      size: 15159
     params:
       params.yaml:
         mlflow.experiment_name: electricity-demand-forecast
@@ -129,32 +129,32 @@ stages:
     outs:
     - path: models/candidate_model.joblib
       hash: md5
-      md5: 737bf2b7adf61aba6bb1077a9526023c
-      size: 38072198
+      md5: 386298485a82db798c98b83bee13f232
+      size: 38072162
     - path: reports/train_metrics.json
       hash: md5
-      md5: d9d342dc79a4a11aed74ef19b8448e87
-      size: 168
+      md5: 393122ad7c43491d44a44b90f3ebc666
+      size: 174
   evaluate:
     cmd: python -m energy_mlops.cli evaluate
     deps:
     - path: data/processed/feature_schema.json
       hash: md5
-      md5: 18c6a7020de292c38f52405b420adbe8
-      size: 437
+      md5: bf3cf24faafa36437bf42375db2e59d7
+      size: 464
     - path: data/processed/test.csv
       hash: md5
-      md5: b0242bee9669f1c6b8178bb15b69e375
-      size: 8011595
+      md5: 3faf0a8325ce8b5f1b00abd0408c0229
+      size: 8039513
     - path: energy_mlops
       hash: md5
-      md5: 85d897fd1ae90043007c08e576b49008.dir
-      size: 41281
+      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
+      size: 41279
       nfiles: 12
     - path: models/candidate_model.joblib
       hash: md5
-      md5: 737bf2b7adf61aba6bb1077a9526023c
-      size: 38072198
+      md5: 386298485a82db798c98b83bee13f232
+      size: 38072162
     params:
       params.yaml:
         model.minimum_baseline_improvement: 0.0
@@ -162,5 +162,5 @@ stages:
     outs:
     - path: reports/evaluation_metrics.json
       hash: md5
-      md5: 67b5ac8c0620ab399cf3f935e68845e0
-      size: 1209
+      md5: ca28c118b880c7762d43d9cc65919f1f
+      size: 1249

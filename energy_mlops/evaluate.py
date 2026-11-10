@@ -1,3 +1,4 @@
+# Evaluate the candidate model against a holdout test set and log the results to MLflow.
 from __future__ import annotations
 
 import json

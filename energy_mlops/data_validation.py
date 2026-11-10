@@ -30,12 +30,10 @@ def dataset_issues(df: pd.DataFrame, target_column: str, interval_minutes: int) 
         issues.append("Readings must be non-negative.")
     return issues
 
-
 def check_dataset(df: pd.DataFrame, target_column: str, interval_minutes: int) -> None:
     issues = dataset_issues(df, target_column, interval_minutes)
     if issues:
         raise ValueError(f"Dataset validation failed: {issues}")
-
 
 def validate_dataset(df: pd.DataFrame, target_column: str | None = None) -> dict:
     params = load_params()

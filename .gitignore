@@ -19,7 +19,6 @@ reports/
 *.pkl
 *.log
 .dvc/cache/
-dvc.lock*
 .dvc/tmp/
 .dvc/config.local
 .DS_Store

@@ -1,3 +1,6 @@
+# Command-line interface for the electricity demand forecasting MLOps pipeline.
+# Provides a command-line interface for ingesting, validating, preprocessing, training, evaluating, promoting, and rolling back models.
+# by running python cli.py <command>(--ingest, --validate, --preprocess, --train, --evaluate, --promote, --rollback)
 from __future__ import annotations
 
 import argparse

@@ -6,7 +6,7 @@ import pandas as pd
 
 from .config import PROCESSED_DIR, RAW_DATA_PATH
 
-
+# Load the raw dataset from a CSV file and normalize its structure.
 def load_raw_dataset(raw_path: str | Path = RAW_DATA_PATH) -> pd.DataFrame:
     path = Path(raw_path)
     if not path.exists():
@@ -30,7 +30,7 @@ def load_raw_dataset(raw_path: str | Path = RAW_DATA_PATH) -> pd.DataFrame:
 
     return df
 
-
+# Load the raw dataset and save a snapshot to the processed directory.
 def ingest(raw_path: str | Path = RAW_DATA_PATH, snapshot_path: str | Path | None = None) -> pd.DataFrame:
     df = load_raw_dataset(raw_path)
     snapshot = Path(snapshot_path) if snapshot_path else PROCESSED_DIR / "raw_snapshot.csv"
