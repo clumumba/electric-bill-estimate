@@ -108,7 +108,18 @@ def _validated_frame(records, bundle):
     for index, record in enumerate(records):
         missing, unknown = sorted(expected - record.keys()), sorted(record.keys() - expected)
         if missing or unknown:
-            raise HTTPException(422, {"instance": index, "missing_features": missing, "unknown_features": unknown})
+            problems = []
+            if missing:
+                problems.append(f"Add the required feature(s): {', '.join(missing)}.")
+            if unknown:
+                problems.append(f"Remove unrecognized feature(s): {', '.join(unknown)}.")
+            raise HTTPException(422, {
+                "message": f"Instance {index + 1}: {' '.join(problems)}",
+                "instance": index,
+                "missing_features": missing,
+                "unknown_features": unknown,
+                "hint": "Use GET /v1/model/schema to see the exact feature names required for every instance.",
+            })
     return pd.DataFrame(records, columns=bundle.feature_columns)
 
 
@@ -140,9 +151,24 @@ def create_app(model_path: Path | None = None) -> FastAPI:
                   openapi_url=None if production else "/openapi.json")
     @app.exception_handler(RequestValidationError)
     async def validation_error(request, exc):
-        return JSONResponse(status_code=422, content={"detail": [
-            {key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()
-        ]})
+        errors = [{key: error[key] for key in ("loc", "msg", "type")} for error in exc.errors()]
+        tips = []
+        for error in errors:
+            loc = error["loc"]
+            field = str(loc[-1]) if loc else "request"
+            if field == "features":
+                tips.append("Each instance needs a 'features' object with numeric values.")
+            elif field == "timestamps":
+                tips.append("Provide one timezone-aware timestamp per instance, in order, at the model's interval cadence.")
+            elif field == "instances":
+                tips.append("Provide an 'instances' array containing one feature object per forecast interval.")
+            elif field in {"energy_rate_per_kwh", "fixed_charge", "tax_rate", "currency"}:
+                tips.append("Check the tariff fields: rates and charges must be nonnegative, tax_rate must be 0–1, and currency must be a three-letter code.")
+        return JSONResponse(status_code=422, content={
+            "message": "The request could not be used. Check the field errors and correct the request body.",
+            "errors": errors,
+            "hints": list(dict.fromkeys(tips)),
+        })
 
     metrics = Metrics()
     app.state.metrics = metrics
@@ -205,7 +231,13 @@ def create_app(model_path: Path | None = None) -> FastAPI:
         if len(timestamps) != len(payload.instances) or any(
                 later - earlier != timedelta(minutes=bundle.interval_minutes)
                 for earlier, later in zip(timestamps, timestamps[1:])):
-            raise HTTPException(422, "Provide one ordered, contiguous timestamp per interval.")
+            raise HTTPException(422, {
+                "message": "The timestamps do not match the forecast intervals.",
+                "hint": f"Provide exactly {len(payload.instances)} timezone-aware timestamps, one per instance, ordered {bundle.interval_minutes} minutes apart.",
+                "instances": len(payload.instances),
+                "timestamps": len(timestamps),
+                "interval_minutes": bundle.interval_minutes,
+            })
         tariff = payload.tariff or default_tariff
         predictions = infer([item.features for item in payload.instances], bundle)
         kwh = sum((Decimal(str(value)) for value in predictions), Decimal("0")) * Decimal(bundle.interval_minutes) / 60

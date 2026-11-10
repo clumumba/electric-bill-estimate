@@ -14,7 +14,7 @@ import yaml
 def test_clean_checkout_dvc_repro_and_parameter_invalidation(tmp_path):
     source = Path(__file__).resolve().parents[1]
     shutil.copytree(source / "energy_mlops", tmp_path / "energy_mlops", ignore=shutil.ignore_patterns("__pycache__"))
-    for name in ("dvc.yaml", ".dvcignore", "requirements-training.txt"):
+    for name in ("dvc.yaml", ".dvcignore", "requirements.txt"):
         shutil.copy(source / name, tmp_path / name)
     params = yaml.safe_load((source / "params.yaml").read_text())
     params["model"].update(n_estimators=3, max_depth=3, minimum_r2=-100, minimum_baseline_improvement=-100)

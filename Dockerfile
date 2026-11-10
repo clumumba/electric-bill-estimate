@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     OPENBLAS_NUM_THREADS=1
 
 COPY requirements.txt ./requirements.txt
-RUN pip install --only-binary=:all: -r requirements.txt \
+RUN pip install -r requirements.txt \
     && groupadd --gid 10001 app \
     && useradd --uid 10001 --gid app --no-create-home app \
     && mkdir /models && chown app:app /models

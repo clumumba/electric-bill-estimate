@@ -37,7 +37,7 @@ stages:
       - data/processed/train.csv
       - data/processed/feature_schema.json
       - energy_mlops
-      - requirements-training.txt
+      - requirements.txt
     params:
       - model
       - mlflow.experiment_name

@@ -9,8 +9,8 @@ stages:
       size: 710998915
     - path: energy_mlops
       hash: md5
-      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
-      size: 41279
+      md5: de56f718c68c4910a26b04237299b530.dir
+      size: 44348
       nfiles: 12
     outs:
     - path: data/processed/raw_snapshot.csv
@@ -26,8 +26,8 @@ stages:
       size: 732717147
     - path: energy_mlops
       hash: md5
-      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
-      size: 41279
+      md5: de56f718c68c4910a26b04237299b530.dir
+      size: 44348
       nfiles: 12
     params:
       params.yaml:
@@ -51,8 +51,8 @@ stages:
       size: 138
     - path: energy_mlops
       hash: md5
-      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
-      size: 41279
+      md5: de56f718c68c4910a26b04237299b530.dir
+      size: 44348
       nfiles: 12
     params:
       params.yaml:
@@ -108,13 +108,13 @@ stages:
       size: 28647491
     - path: energy_mlops
       hash: md5
-      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
-      size: 41279
+      md5: de56f718c68c4910a26b04237299b530.dir
+      size: 44348
       nfiles: 12
-    - path: requirements-training.txt
+    - path: requirements.txt
       hash: md5
-      md5: afe50f876bd53a5006c7bfd753f6686a
-      size: 15159
+      md5: fe0883c24d99e66fdf497168cd8795d1
+      size: 3008
     params:
       params.yaml:
         mlflow.experiment_name: electricity-demand-forecast
@@ -129,11 +129,11 @@ stages:
     outs:
     - path: models/candidate_model.joblib
       hash: md5
-      md5: 386298485a82db798c98b83bee13f232
+      md5: dcf707d0e88d7e7d523c7749840a1181
       size: 38072162
     - path: reports/train_metrics.json
       hash: md5
-      md5: 393122ad7c43491d44a44b90f3ebc666
+      md5: 3afda125adce66dccf3df14abd169d0b
       size: 174
   evaluate:
     cmd: python -m energy_mlops.cli evaluate
@@ -148,12 +148,12 @@ stages:
       size: 8039513
     - path: energy_mlops
       hash: md5
-      md5: 57f877d44b5dfb18dd5327b6b3c13d46.dir
-      size: 41279
+      md5: de56f718c68c4910a26b04237299b530.dir
+      size: 44348
       nfiles: 12
     - path: models/candidate_model.joblib
       hash: md5
-      md5: 386298485a82db798c98b83bee13f232
+      md5: dcf707d0e88d7e7d523c7749840a1181
       size: 38072162
     params:
       params.yaml:
@@ -162,5 +162,5 @@ stages:
     outs:
     - path: reports/evaluation_metrics.json
       hash: md5
-      md5: ca28c118b880c7762d43d9cc65919f1f
-      size: 1249
+      md5: 659608319b8ea21836322698c139fff1
+      size: 1248

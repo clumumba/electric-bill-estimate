@@ -9,7 +9,7 @@ accuracy on current production demand. Validate recent representative data befor
 
 ## 1. Set up the Linux environment
 
-Use Bash on x86_64 Linux with Python 3.12 and its `venv` module installed.
+Use Linux with Python 3.12 and its `venv` module installed.
 From the outer `elec-bill/` directory, enter the application directory. If you
 are already beside `main.py`, skip the first command. Run the remaining examples
 from this directory.
@@ -146,9 +146,19 @@ intended for loopback-only use.
 - `GET /metrics`: Prometheus request counts, latency histograms, successful prediction
   counts, and active model version. Protect the scrape credential like an API key.
 
-Use the schema endpoint to supply **every** feature with no extra fields. Callers
-must construct calendar features and lags using the same formulas and observed
-history as training. Feature construction from raw history is not yet an API endpoint.
+For a local Uvicorn run, open `http://127.0.0.1:8000/docs`, expand `POST /v1/bill-estimates`,
+and choose **Try it out**. Before submitting, open `GET /v1/model/schema` in the docs
+and copy its `feature_columns` names into each instance's `features` object. The
+`all_required_features` value in the example below is a placeholder and must be
+replaced; it is not a valid feature name. Supply every listed feature exactly once,
+with a numeric value, and remove any extra keys. If the API key is configured, add
+`X-API-Key` in the docs' **Authorize** control.
+
+Callers must construct calendar features and lags using the same formulas and
+observed history as training. Feature construction from raw history is not yet an
+API endpoint. A 422 response includes a message and hints; feature errors list the
+missing and unrecognized names, while timestamp errors report the required interval
+cadence. Use those details to correct the submitted JSON and try again.
 Requests are limited to 1 MiB, 1,000 instances, and 256 features per instance; body
 limits also apply to chunked requests. `MAX_BODY_BYTES` and
 `MAX_CONCURRENT_REQUESTS` (default 8) configure per-process limits. Scale using one
@@ -163,7 +173,32 @@ represent interval starts and must be ordered, unique, and contiguous. This is a
 
 ```json
 {
-  "instances": [{"features": {"all_required_features": 0.0}}],
+  "instances": [
+    {
+      "features": {
+        "hour": 0,
+        "day_of_week": 4,
+        "day_of_month": 1,
+        "month": 1,
+        "is_weekend": 0,
+        "hour_sin": 0,
+        "hour_cos": 1,
+        "month_sin": 0.5,
+        "month_cos": 0.866,
+        "lag_1": 0,
+        "lag_2": 0,
+        "lag_3": 0,
+        "lag_4": 0,
+        "lag_8": 0,
+        "lag_12": 0,
+        "lag_24": 0,
+        "lag_48": 0,
+        "lag_96": 0,
+        "lag_192": 0,
+        "lag_672": 0
+      }
+    }
+  ],
   "timestamps": ["2026-01-01T00:00:00+00:00"],
   "tariff": {
     "energy_rate_per_kwh": "0.18",
@@ -171,7 +206,7 @@ represent interval starts and must be ordered, unique, and contiguous. This is a
     "tax_rate": "0.05",
     "currency": "USD"
   },
-  "include_fixed_charge": false
+  "include_fixed_charge": true
 }
 ```
 
@@ -204,24 +239,3 @@ consistency checks, and a Docker build/startup smoke test. The synthetic model i
 only a test fixture, never a release candidate. CI runs when this application
 repository is pushed to a GitHub repository with Actions enabled.
 
-## Updating dependency locks
-
-Run in a Linux x86_64 Python 3.12 environment. Review dependency changes and run all
-tests before deploying updated locks. Keep the serving and development files
-without hashes as shown below.
-
-```bash
-python -m pip install pip-tools==7.6.1
-python -m piptools compile --strip-extras -o requirements.txt requirements.in
-python -m piptools compile --strip-extras -o requirements-training.txt requirements-training.in
-python -m piptools compile --strip-extras -o requirements-dev.txt requirements-dev.in
-wheelhouse=$(mktemp -d)
-python -m pip download --no-deps -r requirements-training.txt -d "$wheelhouse"
-python scripts/hash_requirements.py "$wheelhouse" requirements-training.txt
-python -m pip install -r requirements-dev.txt
-python -m pip check
-python -m pytest -q
-```
-
-The training stack includes a source-only dependency. Serving uses wheels only.
-Update the pinned Docker base digest through the same tested release process.
